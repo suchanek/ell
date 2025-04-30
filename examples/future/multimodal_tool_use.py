@@ -1,9 +1,10 @@
-import ell
-
-from ell import ContentBlock
-from PIL import Image
 import numpy as np
+from PIL import Image
+
+import ell
+from ell import ContentBlock
 from ell.types.message import to_content_blocks
+
 
 @ell.tool()
 def get_user_name():
@@ -15,7 +16,7 @@ def get_user_name():
 
 def generate_strawberry_image():
     # Create a 200x200 white image
-    img = Image.new('RGB', (200, 200), color='white')
+    img = Image.new("RGB", (200, 200), color="white")
     pixels = img.load()
 
     # Draw a red strawberry shape
@@ -35,21 +36,28 @@ def generate_strawberry_image():
     for _ in range(50):
         seed_x = np.random.randint(40, 160)
         seed_y = np.random.randint(40, 160)
-        if np.sqrt((seed_x-100)**2 + (seed_y-100)**2) < 80:
+        if np.sqrt((seed_x - 100) ** 2 + (seed_y - 100) ** 2) < 80:
             pixels[seed_x, seed_y] = (255, 255, 0)
 
     return img
+
 
 @ell.tool()
 def get_ice_cream_flavors():
     """
     Return a list of ice cream flavors.
     """
-    #XXX: Nice coercion function needed
-    return to_content_blocks([("1. Vanilla"), "2.", (generate_strawberry_image()), ("3. Coconut")])
+    # XXX: Nice coercion function needed
+    return to_content_blocks(
+        [("1. Vanilla"), "2.", (generate_strawberry_image()), ("3. Coconut")]
+    )
 
 
-@ell.complex(model="claude-3-5-sonnet-20241022", tools=[get_user_name, get_ice_cream_flavors], max_tokens=1000)
+@ell.complex(
+    model="claude-3-7-sonnet-20250219",
+    tools=[get_user_name, get_ice_cream_flavors],
+    max_tokens=1000,
+)
 def f(message_history: list[ell.Message]) -> list[ell.Message]:
     return [
         ell.system(

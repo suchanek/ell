@@ -85,5 +85,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 ell-studio = "ell.studio.__main__:main"
 
-# [tool.poetry.build]
-# # script = "build.py"
+[tool.poetry.build]
+script = "build.py"

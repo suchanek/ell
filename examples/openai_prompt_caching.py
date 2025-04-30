@@ -1,48 +1,23 @@
 from typing import List
+
 import ell
 
 
-@ell.simple(model="gpt-4o-2024-08-06", store=True)
-def cached_chat(history : List[str], new_message : str) -> str:
-    """You are a helpful assistant who chats with the user. 
-        Your response should < 2 sentences."""
+@ell.simple(model="gpt-4o", store=True)
+def cached_chat(history: List[str], new_message: str) -> str:
+    """You are a helpful assistant who chats with the user.
+    Your response should < 2 sentences."""
 
-    return f"""Here is the chat history: {'\n'.join(history)}.
+    return f"""Here is the chat history: {chr(10).join(history)}.
     Please respond to this message:
       {new_message}"""
-
 
 
 if __name__ == "__main__":
     pass
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-ell.init(verbose=True, store='./logdir')
+ell.init(verbose=True, store="./logdir")
 
 
 if __name__ == "__main__":
@@ -61,4 +36,3 @@ if __name__ == "__main__":
             response = cached_chat(history, message)
             history.append("User: " + message + "\n")
             history.append("Assistant: " + response + "\n")
-

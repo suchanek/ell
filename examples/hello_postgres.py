@@ -1,16 +1,19 @@
-import ell
 import numpy as np
 
+import ell
 from ell.stores.sql import PostgresStore
 
+
 class MyPrompt:
-    x : int
+    x: int
+
 
 def get_random_length():
     return int(np.random.beta(2, 6) * 1500)
 
+
 @ell.simple(model="gpt-4o-mini")
-def hello(world : str):
+def hello(world: str):
     """Your goal is to be really mean to the other guy while saying hello"""
     name = world.capitalize()
     number_of_chars_in_name = get_random_length()
@@ -19,6 +22,10 @@ def hello(world : str):
 
 
 if __name__ == "__main__":
-    ell.init(verbose=True, store=PostgresStore('postgresql://postgres:postgres@localhost:5432/ell'), autocommit=True)
+    ell.init(
+        verbose=True,
+        store=PostgresStore("postgresql://postgres:postgres@localhost:5432/ell"),
+        autocommit=True,
+    )
 
-    greeting = hello("sam altman") # > "hello sama! ... "
+    greeting = hello("sam altman")  # > "hello sama! ... "

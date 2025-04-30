@@ -1,4 +1,3 @@
-
 ACTIONS = """
 Action Space
 There are four discrete actions available:
@@ -13,20 +12,27 @@ There are four discrete actions available:
 
 from typing import List
 
+import numpy as np
 from pydantic import BaseModel, Field
+
 import ell
 
-import numpy as np
 
 class Action(BaseModel):
     reasoning: str = Field(description="The reasoning for the action to take")
-    action: int = Field(description="The action to take, must be 0 ( go down ), 1, 2 (left) (go up), or 3 (right)")
+    action: int = Field(
+        description="The action to take, must be 0 ( go down ), 1, 2 (left) (go up), or 3 (right)"
+    )
+
 
 x = Action(reasoning="", action=0)
+
+
 @ell.complex(model="gpt-4o-2024-08-06", temperature=0.1, response_format=Action)
-def control_game(prev_renders: List[np.ndarray], current_state : str):
+def control_game(prev_renders: List[np.ndarray], current_state: str):
     return [
-        ell.system("""You are an lunar landar. Youur goal is to land on the moon by getting y to 0.. RULES:
+        ell.system(
+            """You are an lunar landar. Youur goal is to land on the moon by getting y to 0.. RULES:
                    
 Your goal is to go downwards.
 If you can't see your lunar landar, go down.
@@ -38,35 +44,44 @@ Keep your angle as close to 0 as possible by using the left and right orientatio
 You will be given the following actions:
 {actions}
 Only return the action, do not include any other text.
-        """.format(actions=ACTIONS)),
-        ell.user([
-            f"Current state vector (8-dimensional):",
-            f"1. x coordinate: {current_state[0]}",
-            f"2. y coordinate: {current_state[1]}",
-            f"3. x velocity: {current_state[2]}",
-            f"4. y velocity: {current_state[3]}",
-            f"5. angle: {current_state[4]}",
-            f"6. angular velocity: {current_state[5]}",
-            f"7. left leg contact: {current_state[6]}",
-            f"8. right leg contact: {current_state[7]}",
-            f"Previous 3 renders (15 frames apart):",
-            *prev_renders
-        ])
-    ]    
+        """.format(
+                actions=ACTIONS
+            )
+        ),
+        ell.user(
+            [
+                f"Current state vector (8-dimensional):",
+                f"1. x coordinate: {current_state[0]}",
+                f"2. y coordinate: {current_state[1]}",
+                f"3. x velocity: {current_state[2]}",
+                f"4. y velocity: {current_state[3]}",
+                f"5. angle: {current_state[4]}",
+                f"6. angular velocity: {current_state[5]}",
+                f"7. left leg contact: {current_state[6]}",
+                f"8. right leg contact: {current_state[7]}",
+                f"Previous 3 renders (15 frames apart):",
+                *prev_renders,
+            ]
+        ),
+    ]
 
-ell.init(verbose=True, store='./logdir')
+
+ell.init(verbose=True, store="./logdir")
 import gymnasium as gym
-env = gym.make("LunarLander-v2", render_mode="rgb_array")
+
+env = gym.make("LunarLander-v3", render_mode="rgb_array")
 observation, info = env.reset(seed=42)
+import time
+
 import cv2
 import numpy as np
-import time
 
 FRAME_RATE = 30
 SKIP_DURATION = 1
 FRAMES_TO_SKIP = 10
-import PIL 
+import PIL
 from PIL import Image
+
 
 def render_and_display(env, rgb):
     # Resize the RGB image to a smaller version with height 160
@@ -77,7 +92,7 @@ def render_and_display(env, rgb):
     bgr_resized = cv2.resize(bgr, (800, 600), interpolation=cv2.INTER_AREA)
 
     # Display the image
-    cv2.imshow('LunarLander', bgr_resized)
+    cv2.imshow("LunarLander", bgr_resized)
     cv2.waitKey(1)
 
 
@@ -98,10 +113,9 @@ for _ in range(1000):
         prev_render_buffer.pop(0)
     render_and_display(env, render)
 
-
-
-    action = (control_game(prev_renders=prev_render_buffer, current_state=observation)).parsed.action
-
+    action = (
+        control_game(prev_renders=prev_render_buffer, current_state=observation)
+    ).parsed.action
 
     observation, reward, terminated, truncated, info = env.step(action)
     prev_action = action
@@ -112,7 +126,6 @@ for _ in range(1000):
 
         render = env.render()
         render_and_display(env, render)
-
 
     if terminated or truncated:
         break
